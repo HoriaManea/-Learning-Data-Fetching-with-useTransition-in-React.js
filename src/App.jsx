@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useTransition } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function WithTransition() {
+  const [items, setItems] = useState([]);
+  const [query, setQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const handleSearch = () => {
+    startTransition(async () => {
+      const data = await fetch(
+        `https://dummyjson.com/products/search?q=${query}`
+      ).then((res) => res.json());
+      setItems(data.products);
+    });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Caută..."
+      />
+      <button onClick={handleSearch}>Search</button>
 
-export default App
+      {isPending && <p>Loading</p>}
+
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>{item.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
